@@ -43,14 +43,27 @@ const ResultDisplay = styled.p`
   color: #2e7d32;
 `;
 
-const StyledTable = styled(Table)`
-  margintop: 20px;
+// const StyledTable = styled(Table)`
+//   margintop: 20px;
 
-  & .MuiTableHead-root {
-    background-color: #e0e0e0;
+//   & .MuiTableHead-root {
+//     background-color: #e0e0e0;
+//   }
+
+//   & .MuiTableRow-root:nth-of-type(odd) {
+//     background-color: #f5f5f5;
+//   }
+// `;
+const StyledTable = styled(Table)`
+  margin-top: 20px;
+
+  && .MuiTableHead-root .MuiTableCell-head {
+    background-color: #f5f5f5;
+    font-weight: bold;
+    border-bottom: 2px solid #aaa; /* A border for separation */
   }
 
-  & .MuiTableRow-root:nth-of-type(odd) {
+  & .MuiTableRow-root:nth-of-type(even) {
     background-color: #f5f5f5;
   }
 `;
@@ -294,10 +307,9 @@ const MortgageCalculator = () => {
         Calculate
       </StyledButton>
 
-      {/* <p style={{ marginTop: 20 }}>Monthly Payment: ${monthlyPayment}</p> */}
       <ResultDisplay>Monthly Payment: ${monthlyPayment}</ResultDisplay>
 
-      <StyledTable style={{ marginTop: 20 }}>
+      <StyledTable>
         <TableHead>
           <TableRow>
             <TableCell>Year</TableCell>
