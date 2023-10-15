@@ -20,16 +20,61 @@ import Chart from "chart.js/auto";
 // Style the container for a centered look
 const StyledContainer = styled(Container)`
   padding-top: 40px;
+  background-color: #f7f9fc;
+  border-radius: 10px; // Rounded corners
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); // A slight shadow for depth
+  padding: 40px; // Uniform padding
+`;
+
+const StyledButton = styled(Button)`
+  margin-top: 20px;
+  transition: background-color 0.3s, transform 0.3s;
+
+  &:hover {
+    background-color: #455a64; // Slightly darken on hover
+    transform: translateY(-2px); // Gives a subtle "lift" effect
+  }
+`;
+
+const ResultDisplay = styled.p`
+  margin-top: 20px;
+  font-size: 24px;
+  font-weight: bold;
+  color: #2e7d32;
+`;
+
+const StyledTable = styled(Table)`
+  margintop: 20px;
+
+  & .MuiTableHead-root {
+    background-color: #e0e0e0;
+  }
+
+  & .MuiTableRow-root:nth-of-type(odd) {
+    background-color: #f5f5f5;
+  }
+`;
+
+const StyledTextField = styled(TextField)`
+  & .MuiOutlinedInput-root {
+    &:hover .MuiOutlinedInput-notchedOutline {
+      border-color: #64b5f6;
+    }
+    // Added prominent font-weight to the label
+    & .MuiInputLabel-root {
+      font-weight: 500;
+    }
+  }
 `;
 
 const MortgageCalculator = () => {
-  const [homePrice, setHomePrice] = useState(0);
-  const [downPayment, setDownPayment] = useState(0);
+  const [homePrice, setHomePrice] = useState("");
+  const [downPayment, setDownPayment] = useState("");
   const [term, setTerm] = useState(30);
-  const [interestRate, setInterestRate] = useState(0);
-  const [propertyTaxes, setPropertyTaxes] = useState(0);
-  const [homeInsurance, setHomeInsurance] = useState(0);
-  const [monthlyPayment, setMonthlyPayment] = useState(0);
+  const [interestRate, setInterestRate] = useState("");
+  const [propertyTaxes, setPropertyTaxes] = useState("");
+  const [homeInsurance, setHomeInsurance] = useState("");
+  const [monthlyPayment, setMonthlyPayment] = useState("");
   const [amortization, setAmortization] = useState([]);
   const [chartData, setChartData] = useState(() => ({
     labels: [],
@@ -153,7 +198,10 @@ const MortgageCalculator = () => {
 
   return (
     <StyledContainer>
-      <TextField
+      <h1 style={{ textAlign: "center", marginBottom: "30px" }}>
+        Mortgage Calculator
+      </h1>
+      <StyledTextField
         variant="outlined"
         label="Home Price"
         type="number"
@@ -162,6 +210,7 @@ const MortgageCalculator = () => {
         InputProps={{
           inputProps: { min: 0 },
         }}
+        placeholder="e.g. 200000"
         onChange={(e) => {
           e.target.value = e.target.value < 0 ? 0 : e.target.value;
           setHomePrice(parseFloat(e.target.value));
@@ -169,12 +218,13 @@ const MortgageCalculator = () => {
         margin="normal"
       />
 
-      <TextField
+      <StyledTextField
         variant="outlined"
         label="Down Payment"
         type="number"
         fullWidth
         value={downPayment}
+        placeholder="e.g. 50000"
         onChange={(e) => {
           e.target.value = e.target.value < 0 ? 0 : e.target.value;
           setDownPayment(parseFloat(e.target.value));
@@ -193,12 +243,13 @@ const MortgageCalculator = () => {
         <MenuItem value={30}>30 Years</MenuItem>
       </Select>
 
-      <TextField
+      <StyledTextField
         variant="outlined"
         label="Interest Rate"
         type="number"
         fullWidth
         value={interestRate}
+        placeholder="e.g. 7"
         onChange={(e) => {
           e.target.value = e.target.value < 0 ? 0 : e.target.value;
           setInterestRate(parseFloat(e.target.value));
@@ -206,12 +257,13 @@ const MortgageCalculator = () => {
         margin="normal"
       />
 
-      <TextField
+      <StyledTextField
         variant="outlined"
-        label="Property Taxes"
+        label="Property Taxes / Month"
         type="number"
         fullWidth
         value={propertyTaxes}
+        placeholder="e.g. 250"
         onChange={(e) => {
           e.target.value = e.target.value < 0 ? 0 : e.target.value;
           setPropertyTaxes(parseFloat(e.target.value));
@@ -219,12 +271,13 @@ const MortgageCalculator = () => {
         margin="normal"
       />
 
-      <TextField
+      <StyledTextField
         variant="outlined"
-        label="Home Insurance"
+        label="Home Insurance / Month"
         type="number"
         fullWidth
         value={homeInsurance}
+        placeholder="e.g. 150"
         onChange={(e) => {
           e.target.value = e.target.value < 0 ? 0 : e.target.value;
           setHomeInsurance(parseFloat(e.target.value));
@@ -232,18 +285,19 @@ const MortgageCalculator = () => {
         margin="normal"
       />
 
-      <Button
+      <StyledButton
         variant="contained"
         color="primary"
         onClick={computeMonthlyPayment}
         style={{ marginTop: 20 }}
       >
         Calculate
-      </Button>
+      </StyledButton>
 
-      <p style={{ marginTop: 20 }}>Monthly Payment: ${monthlyPayment}</p>
+      {/* <p style={{ marginTop: 20 }}>Monthly Payment: ${monthlyPayment}</p> */}
+      <ResultDisplay>Monthly Payment: ${monthlyPayment}</ResultDisplay>
 
-      <Table style={{ marginTop: 20 }}>
+      <StyledTable style={{ marginTop: 20 }}>
         <TableHead>
           <TableRow>
             <TableCell>Year</TableCell>
@@ -262,7 +316,7 @@ const MortgageCalculator = () => {
             </TableRow>
           ))}
         </TableBody>
-      </Table>
+      </StyledTable>
       {chartData.labels && chartData.labels.length > 0 && (
         <div>
           <Line data={chartData} style={{ marginTop: 20 }} />
