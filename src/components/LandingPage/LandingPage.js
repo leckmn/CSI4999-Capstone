@@ -4,11 +4,11 @@ import Header from "../Header/Header";
 import CalculatorCard from "../Calculators/CalculatorCard";
 import { Grid } from "@mui/material";
 
-import homeAffordabilityCalcImage from "../../images/homeAffordabilityCalc.jpg";
-import debtToIncomeImage from "../../images/DebtToIncome.jpg";
-import mortgageCalcImage from "../../images/mortgageCalculator.jpg";
-import rentVsBuyImage from "../../images/RentVsBuy.jpg";
 import learningImage from "../../images/LearningImage.jpg";
+import mortgageCalculatorPicture from "../../images/MortgageCalculator.png";
+import rentvsBuyCalculatorImage from "../../images/RentVsBuy.png";
+import debtToIncomeCalcImage from "../../images/DebtToIncome.png";
+import affordabilityCalcImage from "../../images/AffordabilityCalc.png";
 
 const LandingPage = () => (
   <div>
@@ -21,7 +21,7 @@ const LandingPage = () => (
       <Grid item xs={12} sm={6}>
         <CalculatorCard
           title="Mortgage Calculator"
-          image={mortgageCalcImage}
+          image={mortgageCalculatorPicture}
           description="Calculate your mortgage payments"
           route="/mortgage-calculator"
         />
@@ -29,7 +29,7 @@ const LandingPage = () => (
       <Grid item xs={12} sm={6}>
         <CalculatorCard
           title="Debt to Income Calculator"
-          image={debtToIncomeImage}
+          image={debtToIncomeCalcImage}
           description="Assess your financial health"
           route="/debt-to-income-calculator"
         />
@@ -37,7 +37,7 @@ const LandingPage = () => (
       <Grid item xs={12} sm={6}>
         <CalculatorCard
           title="Rent vs Buy Calculator"
-          image={rentVsBuyImage}
+          image={rentvsBuyCalculatorImage}
           description="Compare the cost of renting vs buying"
           route="/rent-vs-buy-calculator"
         />
@@ -45,7 +45,7 @@ const LandingPage = () => (
       <Grid item xs={12} sm={6}>
         <CalculatorCard
           title="Home Affordability Calculator"
-          image={homeAffordabilityCalcImage}
+          image={affordabilityCalcImage}
           description="Determine how much house you can afford"
           route="/home-affordability-calculator"
         />

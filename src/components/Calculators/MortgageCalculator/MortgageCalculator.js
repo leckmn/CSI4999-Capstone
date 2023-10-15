@@ -43,17 +43,6 @@ const ResultDisplay = styled.p`
   color: #2e7d32;
 `;
 
-// const StyledTable = styled(Table)`
-//   margintop: 20px;
-
-//   & .MuiTableHead-root {
-//     background-color: #e0e0e0;
-//   }
-
-//   & .MuiTableRow-root:nth-of-type(odd) {
-//     background-color: #f5f5f5;
-//   }
-// `;
 const StyledTable = styled(Table)`
   margin-top: 20px;
 

@@ -53,7 +53,7 @@ const CalculatorCard = ({ title, image, description, route }) => {
         <CardMedia
           component="img"
           alt={`${title} icon`}
-          height="140"
+          height="225"
           image={image}
           title={title}
           style={{ objectFit: "cover" }}
