@@ -1,0 +1,12 @@
+.footer-toolbar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.footer-text {
+  color: #f6f6f6;
+  font-weight: normal;
+  margin: 0;
+  padding: 0;
+}

@@ -1,5 +1,28 @@
 .header-toolbar {
-  width: 100%;
-  max-width: 1200px;
-  margin: auto;
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  padding: 10px;
+}
+
+.logo {
+  height: 4em;
+  width: 4em;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 20px;
+  overflow: hidden;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0;
+  margin-bottom: 5px;
+}
+
+.subtitle {
+  font-size: 16px;
+  opacity: 0.8;
+  margin: 0;
 }
