@@ -19,6 +19,8 @@ import Chart from "chart.js/auto";
 
 // Style the container for a centered look
 const StyledContainer = styled(Container)`
+  margin-top: 160px;
+  margin-bottom: 60px;
   padding-top: 40px;
   background-color: #f7f9fc;
   border-radius: 10px; // Rounded corners
