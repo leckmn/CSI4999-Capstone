@@ -1,14 +1,8 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, {useState, useEffect} from "react";
 import {
   Button,
   TextField,
-  Select,
-  MenuItem,
   Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
   Container,
 } from "@mui/material";
 import styled from "@emotion/styled";
@@ -16,11 +10,13 @@ import { Line } from "react-chartjs-2";
 import ReactDOM from "react-dom";
 
 const StyledContainer = styled(Container)`
-  padding-top: 40px;
-  background-color: #f7f9fc;
-  border-radius: 10px; // Rounded corners
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); // A slight shadow for depth
-  padding: 40px; // Uniform padding
+margin-top: 160px;
+margin-bottom: 60px;
+padding-top: 40px;
+background-color: #f7f9fc;
+border-radius: 10px; // Rounded corners
+box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); // A slight shadow for depth
+padding: 40px; // Uniform padding
 `;
 
 const StyledButton = styled(Button)`
