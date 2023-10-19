@@ -1,16 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Button,
-  TextField,
-  Select,
-  MenuItem,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Container,
-} from "@mui/material";
+import { Button, TextField, Select, MenuItem, Container } from "@mui/material";
 import styled from "@emotion/styled";
 import { Line } from "react-chartjs-2";
 
@@ -52,7 +41,21 @@ const StyledTextField = styled(TextField)`
     }
   }
 `;
+
 const DebtToIncomeCalculator = () => {
+  const [monthlyDebt, setMonthlyDebt] = useState(0);
+  const [grossIncome, setGrossIncome] = useState(0);
+  const [debtToIncomeRatio, setDebtToIncomeRatio] = useState(null);
+
+  const calculateRatio = () => {
+    if (grossIncome === 0) {
+      // Handle division by zero error or any other validation
+      setDebtToIncomeRatio(null);
+    } else {
+      const ratio = (monthlyDebt / grossIncome) * 100;
+      setDebtToIncomeRatio(ratio.toFixed(2)); // Round to two decimal places
+    }
+  };
   return (
     <StyledContainer>
       <h1 style={{ textAlign: "center", marginBottom: "30px" }}>
@@ -63,12 +66,15 @@ const DebtToIncomeCalculator = () => {
         label="Recurring monthly debt"
         type="number"
         fullWidth
-        // value={monthlyDebt}
+        value={monthlyDebt}
         InputProps={{
           inputProps: { min: 0 },
         }}
         placeholder="e.g. 500"
-        onChange={(e) => {}}
+        onChange={(e) => {
+          e.target.value = e.target.value < 0 ? 0 : e.target.value;
+          setMonthlyDebt(parseFloat(e.target.value));
+        }}
         margin="normal"
       />
 
@@ -77,21 +83,24 @@ const DebtToIncomeCalculator = () => {
         label="Gross Income"
         type="number"
         fullWidth
-        // value={grossIncome}
+        value={grossIncome}
         placeholder="e.g. 4000"
-        onChange={(e) => {}}
+        onChange={(e) => {
+          e.target.value = e.target.value < 0 ? 0 : e.target.value;
+          setGrossIncome(parseFloat(e.target.value));
+        }}
         margin="normal"
       />
       <StyledButton
         variant="contained"
         color="primary"
-        // onClick={computeRatio}
+        onClick={calculateRatio}
         style={{ marginTop: 20 }}
       >
         Calculate
       </StyledButton>
 
-      <ResultDisplay>Debt to Income Ratio: %</ResultDisplay>
+      <ResultDisplay>Debt to Income Ratio: %{debtToIncomeRatio}</ResultDisplay>
     </StyledContainer>
   );
 };
