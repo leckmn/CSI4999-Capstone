@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from "react";
-import { Button, TextField, Select, MenuItem, Container } from "@mui/material";
+import React, { useState } from "react";
+import { Button, TextField, Container } from "@mui/material";
 import styled from "@emotion/styled";
-import { Line } from "react-chartjs-2";
+import { Pie } from "react-chartjs-2";
 
 const StyledContainer = styled(Container)`
   margin-top: 160px;
   margin-bottom: 60px;
   padding-top: 40px;
   background-color: #f7f9fc;
-  border-radius: 10px; // Rounded corners
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); // A slight shadow for depth
-  padding: 40px; // Uniform padding
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 40px;
 `;
 
 const StyledButton = styled(Button)`
@@ -18,8 +18,8 @@ const StyledButton = styled(Button)`
   transition: background-color 0.3s, transform 0.3s;
 
   &:hover {
-    background-color: #455a64; // Slightly darken on hover
-    transform: translateY(-2px); // Gives a subtle "lift" effect
+    background-color: #455a64;
+    transform: translateY(-2px);
   }
 `;
 
@@ -35,7 +35,7 @@ const StyledTextField = styled(TextField)`
     &:hover .MuiOutlinedInput-notchedOutline {
       border-color: #64b5f6;
     }
-    // Added prominent font-weight to the label
+
     & .MuiInputLabel-root {
       font-weight: 500;
     }
@@ -43,17 +43,23 @@ const StyledTextField = styled(TextField)`
 `;
 
 const DebtToIncomeCalculator = () => {
-  const [monthlyDebt, setMonthlyDebt] = useState(0);
-  const [grossIncome, setGrossIncome] = useState(0);
-  const [debtToIncomeRatio, setDebtToIncomeRatio] = useState(null);
-
+  const [debt, setDebt] = useState("");
+  const [income, setIncome] = useState("");
+  const [chartData, setChartData] = useState(null);
   const calculateRatio = () => {
-    if (grossIncome === 0) {
-      // Handle division by zero error or any other validation
-      setDebtToIncomeRatio(null);
-    } else {
-      const ratio = (monthlyDebt / grossIncome) * 100;
-      setDebtToIncomeRatio(ratio.toFixed(2)); // Round to two decimal places
+    if (debt > 0 && income > 0) {
+      const debtToIncomeRatio = (debt / income) * 100;
+      const remainingRatio = 100 - debtToIncomeRatio;
+
+      setChartData({
+        labels: ["Debt", "Income"],
+        datasets: [
+          {
+            data: [debtToIncomeRatio, remainingRatio],
+            backgroundColor: ["red", "green"],
+          },
+        ],
+      });
     }
   };
   return (
@@ -66,41 +72,48 @@ const DebtToIncomeCalculator = () => {
         label="Recurring monthly debt"
         type="number"
         fullWidth
-        value={monthlyDebt}
-        InputProps={{
-          inputProps: { min: 0 },
-        }}
-        placeholder="e.g. 500"
+        value={debt}
+        placeholder="e.g. 700"
         onChange={(e) => {
           e.target.value = e.target.value < 0 ? 0 : e.target.value;
-          setMonthlyDebt(parseFloat(e.target.value));
+          setDebt(parseFloat(e.target.value));
         }}
         margin="normal"
       />
 
       <StyledTextField
         variant="outlined"
-        label="Gross Income"
+        label="Gross monthly income"
         type="number"
         fullWidth
-        value={grossIncome}
+        value={income}
         placeholder="e.g. 4000"
         onChange={(e) => {
           e.target.value = e.target.value < 0 ? 0 : e.target.value;
-          setGrossIncome(parseFloat(e.target.value));
+          setIncome(parseFloat(e.target.value));
         }}
         margin="normal"
       />
+
       <StyledButton
         variant="contained"
         color="primary"
         onClick={calculateRatio}
         style={{ marginTop: 20 }}
       >
-        Calculate
+        Calculate Debt-to-Income Ratio
       </StyledButton>
 
-      <ResultDisplay>Debt to Income Ratio: %{debtToIncomeRatio}</ResultDisplay>
+      {chartData && (
+        <div>
+          <div
+            style={{ textAlign: "center", marginTop: 10, fontSize: "1.5em" }}
+          >
+            Debt-to-Income Ratio: {chartData.datasets[0].data[0].toFixed(2)}%
+          </div>
+          <Pie data={chartData} style={{ marginTop: 20 }} />
+        </div>
+      )}
     </StyledContainer>
   );
 };
