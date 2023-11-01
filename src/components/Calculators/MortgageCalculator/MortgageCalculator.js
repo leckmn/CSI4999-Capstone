@@ -11,11 +11,14 @@ import {
   TableHead,
   TableRow,
   Container,
+  TableContainer,
 } from "@mui/material";
+import Paper from "@mui/material/Paper";
 import styled from "@emotion/styled";
 import { Line } from "react-chartjs-2";
 import { CategoryScale } from "chart.js";
 import Chart from "chart.js/auto";
+import InfoModal from "./InfoModal";
 
 // Style the container for a centered look
 const StyledContainer = styled(Container)`
@@ -46,8 +49,6 @@ const ResultDisplay = styled.p`
 `;
 
 const StyledTable = styled(Table)`
-  margin-top: 20px;
-
   && .MuiTableHead-root .MuiTableCell-head {
     background-color: #f5f5f5;
     font-weight: bold;
@@ -71,6 +72,13 @@ const StyledTextField = styled(TextField)`
   }
 `;
 
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  margin-top: 20px;
+`;
+
 const MortgageCalculator = () => {
   const [homePrice, setHomePrice] = useState("");
   const [downPayment, setDownPayment] = useState("");
@@ -80,10 +88,13 @@ const MortgageCalculator = () => {
   const [homeInsurance, setHomeInsurance] = useState("");
   const [monthlyPayment, setMonthlyPayment] = useState("");
   const [amortization, setAmortization] = useState([]);
+  const [isModalOpen, setModalOpen] = useState(false);
   const [chartData, setChartData] = useState(() => ({
     labels: [],
     datasets: [],
   }));
+  const openModal = () => setModalOpen(true);
+  const closeModal = () => setModalOpen(false);
 
   useEffect(() => {
     if (monthlyPayment > 0) {
@@ -93,6 +104,29 @@ const MortgageCalculator = () => {
   }, [monthlyPayment]);
 
   const computeMonthlyPayment = () => {
+    if (
+      homePrice === undefined ||
+      homePrice === null ||
+      homePrice === "" ||
+      downPayment === undefined ||
+      downPayment === null ||
+      downPayment === "" ||
+      term === undefined ||
+      term === null ||
+      term === "" ||
+      interestRate === undefined ||
+      interestRate === null ||
+      interestRate === "" ||
+      propertyTaxes === undefined ||
+      propertyTaxes === null ||
+      propertyTaxes === "" ||
+      homeInsurance === undefined ||
+      homeInsurance === null ||
+      homeInsurance === ""
+    ) {
+      alert("Please fill all the fields before calculating.");
+      return;
+    }
     const principal = homePrice - downPayment;
     const monthlyInterestRate = interestRate / 100 / 12;
     const numberOfPayments = term * 12;
@@ -288,38 +322,51 @@ const MortgageCalculator = () => {
         }}
         margin="normal"
       />
+      <ButtonContainer>
+        <StyledButton
+          variant="contained"
+          color="primary"
+          onClick={computeMonthlyPayment}
+          style={{ marginTop: 20 }}
+        >
+          Calculate
+        </StyledButton>
 
-      <StyledButton
-        variant="contained"
-        color="primary"
-        onClick={computeMonthlyPayment}
-        style={{ marginTop: 20 }}
-      >
-        Calculate
-      </StyledButton>
+        <StyledButton
+          variant="outlined"
+          color="primary"
+          onClick={openModal}
+          style={{ marginLeft: 10 }}
+        >
+          How it Works
+        </StyledButton>
+      </ButtonContainer>
+      <InfoModal open={isModalOpen} onClose={closeModal} />
 
       <ResultDisplay>Monthly Payment: ${monthlyPayment}</ResultDisplay>
 
-      <StyledTable>
-        <TableHead>
-          <TableRow>
-            <TableCell>Year</TableCell>
-            <TableCell>Total Interest for the Year</TableCell>
-            <TableCell>Total Principal for the Year</TableCell>
-            <TableCell>Remaining Balance at Year End</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {amortization.map((row, index) => (
-            <TableRow key={index}>
-              <TableCell>{row.year}</TableCell>
-              <TableCell>${row.interest}</TableCell>
-              <TableCell>${row.principal}</TableCell>
-              <TableCell>${row.remaining}</TableCell>
+      <TableContainer component={Paper}>
+        <StyledTable>
+          <TableHead>
+            <TableRow>
+              <TableCell>Year</TableCell>
+              <TableCell>Total Interest for the Year</TableCell>
+              <TableCell>Total Principal for the Year</TableCell>
+              <TableCell>Remaining Balance at Year End</TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </StyledTable>
+          </TableHead>
+          <TableBody>
+            {amortization.map((row, index) => (
+              <TableRow key={index}>
+                <TableCell>{row.year}</TableCell>
+                <TableCell>${row.interest}</TableCell>
+                <TableCell>${row.principal}</TableCell>
+                <TableCell>${row.remaining}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </StyledTable>
+      </TableContainer>
       {chartData.labels && chartData.labels.length > 0 && (
         <div>
           <Line data={chartData} style={{ marginTop: 20 }} />
