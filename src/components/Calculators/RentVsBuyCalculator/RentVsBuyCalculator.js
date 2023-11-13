@@ -8,6 +8,7 @@ import {
 import styled from "@emotion/styled";
 import { Line } from "react-chartjs-2";
 import ReactDOM from "react-dom";
+import InfoModal from "./InfoModal";
 
 const StyledContainer = styled(Container)`
 margin-top: 160px;
@@ -50,6 +51,13 @@ const StyledTable = styled(Table)`
   }
 `;
 
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  margin-top: 20px;
+`;
+
 const StyledTextField = styled(TextField)`
   & .MuiOutlinedInput-root {
     &:hover .MuiOutlinedInput-notchedOutline {
@@ -75,10 +83,14 @@ const RentVsBuyCalculator = () => {
   const [appreciation, setAppreciation] = useState("");
   const [tmpChart, setTmpChart] = useState("");
   const [resultMessage, setResultMessage] = useState("");
+  const [isModalOpen, setModalOpen] = useState(false);
   const [chartData, setChartData] = useState(() => ({
     labels: [],
     datasets: [],
   }));
+
+  const openModal = () => setModalOpen(true);
+  const closeModal = () => setModalOpen(false);
 
   useEffect(() => {
     if (tmpChart > 0) {
@@ -325,15 +337,25 @@ const RentVsBuyCalculator = () => {
         margin="normal"
       />
 
-
-      <StyledButton
-        variant="contained"
-        color="primary"
-        onClick={generateChartData}
-        style={{ marginTop: 20 }}
-      >
-        Calculate
-      </StyledButton>
+      <ButtonContainer>
+        <StyledButton
+          variant="contained"
+          color="primary"
+          onClick={generateChartData}
+          style={{ marginTop: 20 }}
+        >
+          Calculate
+        </StyledButton>
+        <StyledButton
+              variant="outlined"
+              color="primary"
+              onClick={openModal}
+              style={{ marginLeft: 10 }}
+            >
+              Guide
+          </StyledButton>
+        </ButtonContainer>
+      <InfoModal open={isModalOpen} onClose={closeModal} />
       <ResultDisplay>{resultMessage}</ResultDisplay>
       {chartData.labels && chartData.labels.length > 0 && (
         <div>
