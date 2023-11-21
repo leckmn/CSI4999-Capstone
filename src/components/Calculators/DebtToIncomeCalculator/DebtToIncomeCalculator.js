@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Button, TextField, Container } from "@mui/material";
 import styled from "@emotion/styled";
 import { Pie } from "react-chartjs-2";
+import { useReactToPrint } from "react-to-print";
 
 const StyledContainer = styled(Container)`
   margin-top: 160px;
@@ -46,6 +47,17 @@ const DebtToIncomeCalculator = () => {
   const [debt, setDebt] = useState("");
   const [income, setIncome] = useState("");
   const [chartData, setChartData] = useState(null);
+  /////////
+  const [isModalOpen, setModalOpen] = useState(false);
+  const openModal = () => setModalOpen(true);
+  const closeModal = () => setModalOpen(false);
+  /////////
+
+  const printRef = useRef();
+  const handlePrint = useReactToPrint({
+    content: () => printRef.current,
+    documentTitle: "Mortgage Calculation Results",
+  });
   const calculateRatio = () => {
     if (debt > 0 && income > 0) {
       const debtToIncomeRatio = (debt / income) * 100;
@@ -63,58 +75,80 @@ const DebtToIncomeCalculator = () => {
     }
   };
   return (
-    <StyledContainer>
-      <h1 style={{ textAlign: "center", marginBottom: "30px" }}>
-        Debt to Income Ratio Calculator
-      </h1>
-      <StyledTextField
-        variant="outlined"
-        label="Recurring monthly debt"
-        type="number"
-        fullWidth
-        value={debt}
-        placeholder="e.g. 700"
-        onChange={(e) => {
-          e.target.value = e.target.value < 0 ? 0 : e.target.value;
-          setDebt(parseFloat(e.target.value));
-        }}
-        margin="normal"
-      />
+    <div ref={printRef}>
+      <StyledContainer>
+        <h1 style={{ textAlign: "center", marginBottom: "30px" }}>
+          Debt to Income Ratio Calculator
+        </h1>
+        <StyledTextField
+          variant="outlined"
+          label="Recurring monthly debt"
+          type="number"
+          fullWidth
+          value={debt}
+          placeholder="e.g. 700"
+          onChange={(e) => {
+            e.target.value = e.target.value < 0 ? 0 : e.target.value;
+            setDebt(parseFloat(e.target.value));
+          }}
+          margin="normal"
+        />
 
-      <StyledTextField
-        variant="outlined"
-        label="Gross monthly income"
-        type="number"
-        fullWidth
-        value={income}
-        placeholder="e.g. 4000"
-        onChange={(e) => {
-          e.target.value = e.target.value < 0 ? 0 : e.target.value;
-          setIncome(parseFloat(e.target.value));
-        }}
-        margin="normal"
-      />
-
-      <StyledButton
-        variant="contained"
-        color="primary"
-        onClick={calculateRatio}
-        style={{ marginTop: 20 }}
-      >
-        Calculate Debt-to-Income Ratio
-      </StyledButton>
-
-      {chartData && (
+        <StyledTextField
+          variant="outlined"
+          label="Gross monthly income"
+          type="number"
+          fullWidth
+          value={income}
+          placeholder="e.g. 4000"
+          onChange={(e) => {
+            e.target.value = e.target.value < 0 ? 0 : e.target.value;
+            setIncome(parseFloat(e.target.value));
+          }}
+          margin="normal"
+        />
         <div>
-          <div
-            style={{ textAlign: "center", marginTop: 10, fontSize: "1.5em" }}
+          <StyledButton
+            variant="contained"
+            color="primary"
+            onClick={calculateRatio}
+            style={{ marginTop: 20 }}
           >
-            Debt-to-Income Ratio: {chartData.datasets[0].data[0].toFixed(2)}%
-          </div>
-          <Pie data={chartData} style={{ marginTop: 20 }} />
+            Calculate DTI Ratio
+          </StyledButton>
+          {/* <StyledButton
+          variant="outlined"
+          color="primary"
+          onClick={openModal}
+          style={{ marginLeft: 10 }}
+        >
+          Guide
+        </StyledButton> */}
+          <StyledButton
+            variant="contained"
+            color="primary"
+            onClick={handlePrint}
+            style={{ marginLeft: 20 }}
+          >
+            PDF
+          </StyledButton>
         </div>
-      )}
-    </StyledContainer>
+
+        {chartData && (
+          <div>
+            <div
+              style={{ textAlign: "center", marginTop: 30, fontSize: "1.5em" }}
+            >
+              Debt-to-Income Ratio: {chartData.datasets[0].data[0].toFixed(2)}%
+            </div>
+            <div style={{ width: "300px", height: "300px", margin: "auto" }}>
+              {" "}
+              <Pie data={chartData} style={{ marginTop: 30 }} />
+            </div>
+          </div>
+        )}
+      </StyledContainer>
+    </div>
   );
 };
 
