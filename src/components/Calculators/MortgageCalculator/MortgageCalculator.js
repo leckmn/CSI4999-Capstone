@@ -19,6 +19,8 @@ import { Line } from "react-chartjs-2";
 import { CategoryScale } from "chart.js";
 import Chart from "chart.js/auto";
 import InfoModal from "./InfoModal";
+import Header from ".././../Header/Header";
+import { useReactToPrint } from "react-to-print";
 
 // Style the container for a centered look
 const StyledContainer = styled(Container)`
@@ -234,156 +236,174 @@ const MortgageCalculator = () => {
     });
   };
 
+  const printRef = useRef();
+  const handlePrint = useReactToPrint({
+    content: () => printRef.current,
+    documentTitle: "Mortgage Calculation Results",
+  });
+
   return (
-    <StyledContainer>
-      <h1 style={{ textAlign: "center", marginBottom: "30px" }}>
-        Mortgage Calculator
-      </h1>
-      <StyledTextField
-        variant="outlined"
-        label="Home Price"
-        type="number"
-        fullWidth
-        value={homePrice}
-        InputProps={{
-          inputProps: { min: 0 },
-        }}
-        placeholder="e.g. 200000"
-        onChange={(e) => {
-          e.target.value = e.target.value < 0 ? 0 : e.target.value;
-          setHomePrice(parseFloat(e.target.value));
-        }}
-        margin="normal"
-      />
-
-      <StyledTextField
-        variant="outlined"
-        label="Down Payment"
-        type="number"
-        fullWidth
-        value={downPayment}
-        placeholder="e.g. 50000"
-        onChange={(e) => {
-          e.target.value = e.target.value < 0 ? 0 : e.target.value;
-          setDownPayment(parseFloat(e.target.value));
-        }}
-        margin="normal"
-      />
-
-      <Select
-        variant="outlined"
-        fullWidth
-        value={term}
-        onChange={(e) => setTerm(parseInt(e.target.value, 10))}
-        margin="normal"
-      >
-        <MenuItem value={15}>15 Years</MenuItem>
-        <MenuItem value={30}>30 Years</MenuItem>
-      </Select>
-
-      <StyledTextField
-        variant="outlined"
-        label="Interest Rate"
-        type="number"
-        fullWidth
-        value={interestRate}
-        placeholder="e.g. 7"
-        onChange={(e) => {
-          e.target.value = e.target.value < 0 ? 0 : e.target.value;
-          setInterestRate(parseFloat(e.target.value));
-        }}
-        margin="normal"
-      />
-
-      <StyledTextField
-        variant="outlined"
-        label="Property Taxes / Month"
-        type="number"
-        fullWidth
-        value={propertyTaxes}
-        placeholder="e.g. 250"
-        onChange={(e) => {
-          e.target.value = e.target.value < 0 ? 0 : e.target.value;
-          setPropertyTaxes(parseFloat(e.target.value));
-        }}
-        margin="normal"
-      />
-
-      <StyledTextField
-        variant="outlined"
-        label="Home Insurance / Month"
-        type="number"
-        fullWidth
-        value={homeInsurance}
-        placeholder="e.g. 150"
-        onChange={(e) => {
-          e.target.value = e.target.value < 0 ? 0 : e.target.value;
-          setHomeInsurance(parseFloat(e.target.value));
-        }}
-        margin="normal"
-      />
-      <ButtonContainer>
-        <StyledButton
-          variant="contained"
-          color="primary"
-          onClick={computeMonthlyPayment}
-          style={{ marginTop: 20 }}
-        >
-          Calculate
-        </StyledButton>
-
-        <StyledButton
+    <div ref={printRef}>
+      <Header />
+      <StyledContainer>
+        <h1 style={{ textAlign: "center", marginBottom: "30px" }}>
+          Mortgage Calculator
+        </h1>
+        <StyledTextField
           variant="outlined"
-          color="primary"
-          onClick={openModal}
-          style={{ marginLeft: 10 }}
+          label="Home Price"
+          type="number"
+          fullWidth
+          value={homePrice}
+          InputProps={{
+            inputProps: { min: 0 },
+          }}
+          placeholder="e.g. 200000"
+          onChange={(e) => {
+            e.target.value = e.target.value < 0 ? 0 : e.target.value;
+            setHomePrice(parseFloat(e.target.value));
+          }}
+          margin="normal"
+        />
+
+        <StyledTextField
+          variant="outlined"
+          label="Down Payment"
+          type="number"
+          fullWidth
+          value={downPayment}
+          placeholder="e.g. 50000"
+          onChange={(e) => {
+            e.target.value = e.target.value < 0 ? 0 : e.target.value;
+            setDownPayment(parseFloat(e.target.value));
+          }}
+          margin="normal"
+        />
+
+        <Select
+          variant="outlined"
+          fullWidth
+          value={term}
+          onChange={(e) => setTerm(parseInt(e.target.value, 10))}
+          margin="normal"
         >
-          How it Works
-        </StyledButton>
-      </ButtonContainer>
-      <InfoModal open={isModalOpen} onClose={closeModal} />
+          <MenuItem value={15}>15 Years</MenuItem>
+          <MenuItem value={30}>30 Years</MenuItem>
+        </Select>
 
-      <ResultDisplay>Monthly Payment: ${monthlyPayment}</ResultDisplay>
+        <StyledTextField
+          variant="outlined"
+          label="Interest Rate"
+          type="number"
+          fullWidth
+          value={interestRate}
+          placeholder="e.g. 7"
+          onChange={(e) => {
+            e.target.value = e.target.value < 0 ? 0 : e.target.value;
+            setInterestRate(parseFloat(e.target.value));
+          }}
+          margin="normal"
+        />
 
-      <TableContainer component={Paper}>
-        <StyledTable>
-          <TableHead>
-            <TableRow>
-              <TableCell>Year</TableCell>
-              <TableCell>Total Interest for the Year</TableCell>
-              <TableCell>Total Principal for the Year</TableCell>
-              <TableCell>Remaining Balance at Year End</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {amortization.map((row, index) => (
-              <TableRow key={index}>
-                <TableCell>{row.year}</TableCell>
-                <TableCell>${row.interest}</TableCell>
-                <TableCell>${row.principal}</TableCell>
-                <TableCell>${row.remaining}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </StyledTable>
-      </TableContainer>
-      {chartData.labels && chartData.labels.length > 0 && (
-        <div>
-          <Line data={chartData} style={{ marginTop: 20 }} />
-          <div
-            style={{ textAlign: "center", marginTop: 10, fontSize: "1.5em" }}
+        <StyledTextField
+          variant="outlined"
+          label="Property Taxes / Month"
+          type="number"
+          fullWidth
+          value={propertyTaxes}
+          placeholder="e.g. 250"
+          onChange={(e) => {
+            e.target.value = e.target.value < 0 ? 0 : e.target.value;
+            setPropertyTaxes(parseFloat(e.target.value));
+          }}
+          margin="normal"
+        />
+
+        <StyledTextField
+          variant="outlined"
+          label="Home Insurance / Month"
+          type="number"
+          fullWidth
+          value={homeInsurance}
+          placeholder="e.g. 150"
+          onChange={(e) => {
+            e.target.value = e.target.value < 0 ? 0 : e.target.value;
+            setHomeInsurance(parseFloat(e.target.value));
+          }}
+          margin="normal"
+        />
+        <ButtonContainer>
+          <StyledButton
+            variant="contained"
+            color="primary"
+            onClick={computeMonthlyPayment}
+            style={{ marginTop: 20 }}
           >
-            Total Interest Paid: $
-            {formatNumber(
-              amortization.reduce(
-                (acc, curr) => acc + parseFloat(curr.interest.replace(",", "")),
-                0
-              )
-            )}
+            Calculate
+          </StyledButton>
+
+          <StyledButton
+            variant="outlined"
+            color="primary"
+            onClick={openModal}
+            style={{ marginLeft: 10 }}
+          >
+            Guide
+          </StyledButton>
+          <StyledButton
+            variant="contained"
+            color="primary"
+            onClick={handlePrint}
+            style={{ marginLeft: "auto" }}
+          >
+            PDF
+          </StyledButton>
+        </ButtonContainer>
+        <InfoModal open={isModalOpen} onClose={closeModal} />
+
+        <ResultDisplay>Monthly Payment: ${monthlyPayment}</ResultDisplay>
+
+        <TableContainer component={Paper}>
+          <StyledTable>
+            <TableHead>
+              <TableRow>
+                <TableCell>Year</TableCell>
+                <TableCell>Total Interest for the Year</TableCell>
+                <TableCell>Total Principal for the Year</TableCell>
+                <TableCell>Remaining Balance at Year End</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {amortization.map((row, index) => (
+                <TableRow key={index}>
+                  <TableCell>{row.year}</TableCell>
+                  <TableCell>${row.interest}</TableCell>
+                  <TableCell>${row.principal}</TableCell>
+                  <TableCell>${row.remaining}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </StyledTable>
+        </TableContainer>
+        {chartData.labels && chartData.labels.length > 0 && (
+          <div>
+            <Line data={chartData} style={{ marginTop: 20 }} />
+            <div
+              style={{ textAlign: "center", marginTop: 10, fontSize: "1.5em" }}
+            >
+              Total Interest Paid: $
+              {formatNumber(
+                amortization.reduce(
+                  (acc, curr) =>
+                    acc + parseFloat(curr.interest.replace(",", "")),
+                  0
+                )
+              )}
+            </div>
           </div>
-        </div>
-      )}
-    </StyledContainer>
+        )}
+      </StyledContainer>
+    </div>
   );
 };
 

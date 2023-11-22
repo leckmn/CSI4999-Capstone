@@ -8,6 +8,24 @@ import SendIcon from '@mui/icons-material/Send';
 import DeleteIcon from '@mui/icons-material/Delete';
 import LiveHelpIcon from '@mui/icons-material/LiveHelp';
 import CalculatorUsageGuide from "./CalculatorUsageGuide";
+//import {PieChart } from '@mui/x-charts/PieChart';
+//import { useDrawingArea } from '@mui/x-charts/hooks';
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend
+} from 'chart.js';
+import { Doughnut } from "react-chartjs-2";
+import { blueGrey, lightGreen } from "@mui/material/colors";
+
+ChartJS.register(
+  ArcElement,
+  Tooltip,
+  Legend
+);
+
+
 
 const StyledContainer = styled(Container)`
 margin-top: 160px;
@@ -48,6 +66,9 @@ const StyledTextField = styled(TextField)`
 `; 
 
 
+
+
+
 const HomeAffordabilityCalculator = () => {
   const[monthlyIncome, setMonthlyIncome] = useState(""); //Initially the start value will be 0
   const[monthlyDebt, setMonthlyDebt] = useState("");
@@ -59,8 +80,33 @@ const HomeAffordabilityCalculator = () => {
   const [isGuideOpen, setModalOpen] = useState(false);
   const openGuide = () => setModalOpen(true);
   const closeGuide = () => setModalOpen(false);
+  const data ={
+    labels:['Debt', 'Home Payment', 'Other'],
+    datasets: [{
+      label:"Monthly Income Breakdown",
+      data: [{monthlyDebt},{downpaymentAmt}],
+      backgroundColor: ['blueGrey','lightGreen'],
+      borderColor:['blueGrey','lightGreen']
+    }]
+  }
+
+ 
 
 
+
+  const validateForm =() =>{
+    if(monthlyIncome.length  == 0) {
+      alert('Invalid Form, Monthly Income can not be empty')
+      return
+    }
+ 
+  }
+ 
+ 
+
+  const options ={
+
+  }
   // let calculatemonthlyhomecost =() => {
   //   if (monthlyIncome > 0 |monthlyDebt > 0 |downpaymentAmt >= 0){
   //        const monthlyHomeCost = (monthlyIncome - monthlyDebt) * 0.28 
@@ -150,8 +196,8 @@ const HomeAffordabilityCalculator = () => {
         
       />
 
-
-    <Stack direction="row" spacing={2}>
+        
+    <Stack direction="row" spacing={2}> 
       <StyledButton      
         variant="contained" 
         endIcon={<SendIcon />}
@@ -181,6 +227,13 @@ const HomeAffordabilityCalculator = () => {
       <div></div>
       
       <ResultDisplay>You can Afford a Home with a Maximum Monthly Cost of: ${monthlyHomecost}</ResultDisplay>
+      <h2> Your Monthly Income Breakdown</h2>
+      <div style ={{width:'40%', height: '40%', margin: 'auto', padding: '20px'}}>
+        <Doughnut
+          data = {data}
+          options = {options}
+        ></Doughnut>
+      </div>
 
     </StyledContainer>
   

@@ -58,7 +58,7 @@ const CalculatorUsageGuide = ({ open, onClose }) => {
               auto loans, gym membership, etc.
             </li>
             <li>
-              <strong>Total Downpayment:</strong> Any savings, investments, or doan payment that you currently have saved up have towards your home.
+              <strong>Total Downpayment:</strong> Any savings, investments, or down payment that you currently have saved up have towards your home.
             </li>
           </ul>
         </p>

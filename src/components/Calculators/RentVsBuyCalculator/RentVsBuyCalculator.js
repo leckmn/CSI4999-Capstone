@@ -8,6 +8,7 @@ import {
 import styled from "@emotion/styled";
 import { Line } from "react-chartjs-2";
 import ReactDOM from "react-dom";
+import InfoModal from "./InfoModal";
 
 const StyledContainer = styled(Container)`
 margin-top: 160px;
@@ -50,6 +51,13 @@ const StyledTable = styled(Table)`
   }
 `;
 
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  margin-top: 20px;
+`;
+
 const StyledTextField = styled(TextField)`
   & .MuiOutlinedInput-root {
     &:hover .MuiOutlinedInput-notchedOutline {
@@ -65,6 +73,7 @@ const StyledTextField = styled(TextField)`
 const RentVsBuyCalculator = () => {
   const [monthlyRent, setMonthlyRent] = useState("");
   const [annualRentIncrease, setAnnualRentIncrease] = useState("");
+  const [secDep, setSecDep] = useState("");
   const [homePrice, setHomePrice] = useState("");
   const [downPayment, setDownPayment] = useState("");
   const [mortgageTerm, setMortgageTerm] = useState("");
@@ -73,10 +82,15 @@ const RentVsBuyCalculator = () => {
   const [propertyTax, setPropertyTax] = useState("");
   const [appreciation, setAppreciation] = useState("");
   const [tmpChart, setTmpChart] = useState("");
+  const [resultMessage, setResultMessage] = useState("");
+  const [isModalOpen, setModalOpen] = useState(false);
   const [chartData, setChartData] = useState(() => ({
     labels: [],
     datasets: [],
   }));
+
+  const openModal = () => setModalOpen(true);
+  const closeModal = () => setModalOpen(false);
 
   useEffect(() => {
     if (tmpChart > 0) {
@@ -90,13 +104,63 @@ const RentVsBuyCalculator = () => {
 
   const generateChartData = ( ) => {
     // Extract the labels (years)
-    const labels = ['Year 0', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6', 'Year 7', 'Year 8', 'Year 9', 'Year 10', 'Year 11', 'Year 12', 'Year 13', 'Year 14', 'Year 15', 'Year 16', 'Year 17', 'Year 18', 'Year 19', 'Year 20', 'Year 21', 'Year 22', 'Year 23', 'Year 24', 'Year 25', 'Year 26', 'Year 27', 'Year 28', 'Year 29', 'Year 30'];
+    const labels = [];
 
-    // Extract and parse the data for remaining principal, interest paid, etc.
-    const rentData = [1000.0, 1000.4551661356395, 1003.641329085116, 1012.2894856622668, 1029.1306326809286, 1056.8957669549386, 1098.3158852981337, 1156.1219845243513, 1233.0450614474282, 1331.8161128812017, 1455.1661356395084, 1605.8261265361857, 1786.5270823850703, 2000.0, 2248.9758761948106, 2536.185707783341, 2864.360491579426, 3236.2312243969045, 3654.5289030496124, 4121.984524351388, 4641.329085116066, 5215.293582157487, 5846.609012289486, 6538.0063723259, 7292.216659080563, 8111.970869367318, 9000.0, 9959.035047792446, 10991.807009558486, 12101.046882111968, 13289.485662266727];
+    for (let i=0; i<=mortgageTerm; i++){
+      labels.push(`Year ${i}`)
+    }
+
+    // Rent information
+    const rentData = [];
+    let rentCurrent = monthlyRent;
+    let rentSum = secDep;
+    rentData.push(rentSum);
+
+    for (let i=0; i<=mortgageTerm; i++){
+      rentSum += rentCurrent*12;
+      rentCurrent *= 1+(annualRentIncrease/100);
+      rentData.push(rentSum);
+    }
 
     // Cumulatively calculate interest paid over the years
-    const homeCostData = [1500.0, 1500.2962962962963, 1502.3703703703704, 1508.0, 1518.962962962963, 1537.037037037037, 1564.0, 1601.6296296296296, 1651.7037037037037, 1716.0, 1796.2962962962963, 1894.3703703703704, 2012.0, 2150.9629629629626, 2313.0370370370374, 2500.0, 2713.6296296296296, 2955.703703703704, 3228.0, 3532.296296296296, 3870.370370370371, 4244.0, 4654.962962962963, 5105.037037037037, 5596.0, 6129.6296296296305, 6707.703703703703, 7332.0, 8004.296296296297, 8726.370370370369, 9500.0];
+    let homeCostData = [];
+
+    let adjustHomePrice = homePrice;
+    let totalMonthlyOld = 0;
+    let homeSum = downPayment;
+
+    for (let i=0; i<=mortgageTerm; i++){
+      let principal = adjustHomePrice - downPayment;
+      let monthlyInterestRate = mortgageInterestRate / 100 / 12;
+      let numberOfPayments = mortgageTerm * 12;
+
+      let top = monthlyInterestRate * Math.pow(1 + monthlyInterestRate, numberOfPayments);
+      let bottom = Math.pow(1 + monthlyInterestRate, numberOfPayments) - 1;
+
+      let rawMortgage = principal * (top / bottom);
+      let totalMonthly = rawMortgage + propertyTax;
+      totalMonthly *= 1 - appreciation/100;
+
+      homeSum += totalMonthly*12;
+
+      homeCostData.push(homeSum);
+      adjustHomePrice *= 1 + (appreciation/100);
+      
+    }
+
+    let switchingPoint = -1;
+    for (let i=0; i<=mortgageTerm; i++){
+      if(homeCostData[i] < rentData[i] && switchingPoint === -1){
+        switchingPoint = i;
+      }
+    }
+
+    if(switchingPoint === -1){
+      setResultMessage("Buying will never be cheaper than renting");
+    } else {
+      setResultMessage(`Buying will be cheaper in ${switchingPoint} years`);
+    }
+    
     
 
     setChartData({
@@ -132,7 +196,7 @@ const RentVsBuyCalculator = () => {
         variant="outlined"
         label="Monthly Rent ($)"
         type="number"
-        placeholder="1500"
+        placeholder="2500"
         fullWidth
         value={monthlyRent}
         InputProps={{
@@ -147,17 +211,32 @@ const RentVsBuyCalculator = () => {
 
       <StyledTextField
         variant="outlined"
-        label="Annual Rent Increase (%)"
+        label="Security Deposit ($)"
         type="number"
-        placeholder="2.5"
+        placeholder="2500"
         fullWidth
-        value={annualRentIncrease}
+        value={secDep}
         onChange={(e) => {
           e.target.value = e.target.value < 0 ? 0 : e.target.value;
-          setAnnualRentIncrease(parseFloat(e.target.value));
+          setSecDep(parseFloat(e.target.value));
         }}
         margin="normal"
       />
+
+      <StyledTextField
+          variant="outlined"
+          label="Annual Rent Increase (%)"
+          type="number"
+          placeholder="2.5"
+          fullWidth
+          value={annualRentIncrease}
+          onChange={(e) => {
+            e.target.value = e.target.value < 0 ? 0 : e.target.value;
+            setAnnualRentIncrease(parseFloat(e.target.value));
+          }}
+          margin="normal"
+        />
+
       <h1 style={{ textAlign: "", marginTop: "30px", marginBottom: "10px" }}>
         Home Information
       </h1>
@@ -165,7 +244,7 @@ const RentVsBuyCalculator = () => {
         variant="outlined"
         label="Home Price ($)"
         type="number"
-        placeholder="400000"
+        placeholder="250000"
         fullWidth
         value={homePrice}
         onChange={(e) => {
@@ -179,7 +258,7 @@ const RentVsBuyCalculator = () => {
         variant="outlined"
         label="Down payment ($)"
         type="number"
-        placeholder="30000"
+        placeholder="50000"
         fullWidth
         value={downPayment}
         onChange={(e) => {
@@ -206,7 +285,7 @@ const RentVsBuyCalculator = () => {
         variant="outlined"
         label="Mortgage Interest Rate (%)"
         type="number"
-        placeholder="10.5"
+        placeholder="3.75"
         fullWidth
         value={mortgageInterestRate}
         onChange={(e) => {
@@ -220,7 +299,7 @@ const RentVsBuyCalculator = () => {
         variant="outlined"
         label="Annual Home Maintenance and Repairs ($)"
         type="number"
-        placeholder="2000"
+        placeholder="250"
         fullWidth
         value={maintenanceRepairs}
         onChange={(e) => {
@@ -234,7 +313,7 @@ const RentVsBuyCalculator = () => {
         variant="outlined"
         label="Property Tax ($)"
         type="number"
-        placeholder="1500"
+        placeholder="250"
         fullWidth
         value={propertyTax}
         onChange={(e) => {
@@ -248,7 +327,7 @@ const RentVsBuyCalculator = () => {
         variant="outlined"
         label="Appreciation Rate"
         type="number"
-        placeholder="7.5"
+        placeholder="3.5"
         fullWidth
         value={appreciation}
         onChange={(e) => {
@@ -258,16 +337,26 @@ const RentVsBuyCalculator = () => {
         margin="normal"
       />
 
-
-      <StyledButton
-        variant="contained"
-        color="primary"
-        onClick={tmpCharSet}
-        style={{ marginTop: 20 }}
-      >
-        Calculate
-      </StyledButton>
-
+      <ButtonContainer>
+        <StyledButton
+          variant="contained"
+          color="primary"
+          onClick={generateChartData}
+          style={{ marginTop: 20 }}
+        >
+          Calculate
+        </StyledButton>
+        <StyledButton
+              variant="outlined"
+              color="primary"
+              onClick={openModal}
+              style={{ marginLeft: 10 }}
+            >
+              Guide
+          </StyledButton>
+        </ButtonContainer>
+      <InfoModal open={isModalOpen} onClose={closeModal} />
+      <ResultDisplay>{resultMessage}</ResultDisplay>
       {chartData.labels && chartData.labels.length > 0 && (
         <div>
           <Line data={chartData} style={{ marginTop: 20 }} />
