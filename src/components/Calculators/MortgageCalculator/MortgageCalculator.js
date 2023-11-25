@@ -19,6 +19,7 @@ import { Line } from "react-chartjs-2";
 import { CategoryScale } from "chart.js";
 import Chart from "chart.js/auto";
 import InfoModal from "./InfoModal";
+import ErrorModal from "./ErrorModal";
 import Header from ".././../Header/Header";
 import { useReactToPrint } from "react-to-print";
 
@@ -91,12 +92,24 @@ const MortgageCalculator = () => {
   const [monthlyPayment, setMonthlyPayment] = useState("");
   const [amortization, setAmortization] = useState([]);
   const [isModalOpen, setModalOpen] = useState(false);
+  const [errorModalOpen, setErrorModalOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [chartData, setChartData] = useState(() => ({
     labels: [],
     datasets: [],
   }));
   const openModal = () => setModalOpen(true);
   const closeModal = () => setModalOpen(false);
+
+  const openErrorModal = (message) => {
+    setErrorMessage(message);
+    setErrorModalOpen(true);
+  };
+
+  const closeErrorModal = () => {
+    setErrorModalOpen(false);
+    setErrorMessage("");
+  };
 
   useEffect(() => {
     if (monthlyPayment > 0) {
@@ -126,7 +139,9 @@ const MortgageCalculator = () => {
       homeInsurance === null ||
       homeInsurance === ""
     ) {
-      alert("Please fill all the fields before calculating.");
+      // If any field is empty, show error and reset the monthly payment
+      setMonthlyPayment(""); // Reset monthly payment
+      openErrorModal("Please fill all the fields before calculating.");
       return;
     }
     const principal = homePrice - downPayment;
@@ -140,8 +155,20 @@ const MortgageCalculator = () => {
     const rawMortgage = principal * (top / bottom);
     const totalMonthly = rawMortgage + propertyTaxes + homeInsurance;
 
-    setMonthlyPayment(parseFloat(totalMonthly.toFixed(2))); // Convert the string back to a float for calculations
+    const calculatedPayment = parseFloat(totalMonthly.toFixed(2));
+
+    // Check if the result is NaN after parsing the float
+    if (isNaN(calculatedPayment)) {
+      setMonthlyPayment(""); // Reset monthly payment
+      openErrorModal(
+        "Invalid input. Please make sure all fields are filled correctly."
+      );
+      return;
+    }
+    // If the result is a valid number, update the state
+    setMonthlyPayment(calculatedPayment);
   };
+
   function formatNumber(number) {
     return parseFloat(number).toLocaleString("en-US", {
       minimumFractionDigits: 2,
@@ -209,10 +236,18 @@ const MortgageCalculator = () => {
 
     // Cumulatively calculate interest paid over the years
     const interestPaidData = [];
+    let totalPaidData = [];
     let accumulatedInterest = 0;
+    let accumulatedTotal = downPayment;
+
     for (let a of amortizationData) {
-      accumulatedInterest += parseValue(a.interest);
+      const yearlyInterest = parseValue(a.interest);
+      const yearlyPrincipal = parseValue(a.principal);
+      accumulatedInterest += yearlyInterest;
+      accumulatedTotal += yearlyInterest + yearlyPrincipal;
+
       interestPaidData.push(accumulatedInterest);
+      totalPaidData.push(accumulatedTotal);
     }
 
     setChartData({
@@ -222,8 +257,8 @@ const MortgageCalculator = () => {
           label: "Remaining Principal",
           data: remainingData,
           fill: false,
-          backgroundColor: "red",
-          borderColor: "red",
+          backgroundColor: "green",
+          borderColor: "green",
         },
         {
           label: "Interest Paid",
@@ -231,6 +266,13 @@ const MortgageCalculator = () => {
           fill: false,
           backgroundColor: "blue",
           borderColor: "blue",
+        },
+        {
+          label: "Total Paid (including Down Payment)",
+          data: totalPaidData,
+          fill: false,
+          backgroundColor: "red",
+          borderColor: "red",
         },
       ],
     });
@@ -389,19 +431,44 @@ const MortgageCalculator = () => {
           <div>
             <Line data={chartData} style={{ marginTop: 20 }} />
             <div
-              style={{ textAlign: "center", marginTop: 10, fontSize: "1.5em" }}
+              style={{
+                display: "flex",
+                justifyContent: "space-around",
+                marginTop: 10,
+                fontSize: "1.5em",
+              }}
             >
-              Total Interest Paid: $
-              {formatNumber(
-                amortization.reduce(
-                  (acc, curr) =>
-                    acc + parseFloat(curr.interest.replace(",", "")),
-                  0
-                )
-              )}
+              <div style={{ color: "#E67E22" }}>
+                Home Price: ${formatNumber(homePrice)}
+              </div>
+              <div style={{ color: "blue" }}>
+                Total Interest Paid: $
+                {formatNumber(
+                  amortization.reduce(
+                    (acc, curr) => acc + parseValue(curr.interest),
+                    0
+                  )
+                )}
+              </div>
+              <div style={{ color: "red" }}>
+                Total Money Paid: $
+                {formatNumber(
+                  chartData.datasets
+                    .find(
+                      (dataset) =>
+                        dataset.label === "Total Paid (including Down Payment)"
+                    )
+                    .data.slice(-1)[0]
+                )}
+              </div>
             </div>
           </div>
         )}
+        <ErrorModal
+          open={errorModalOpen}
+          onClose={closeErrorModal}
+          errorMessage={errorMessage}
+        />
       </StyledContainer>
     </div>
   );
