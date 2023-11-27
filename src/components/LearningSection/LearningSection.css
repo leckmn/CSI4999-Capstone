@@ -1,0 +1,15 @@
+a {
+  text-decoration: none;
+}
+
+p {
+  overflow-wrap: break-word;
+}
+.card {
+  width: 50px;
+}
+
+img {
+  width: 250px;
+  height: 200px;
+}
