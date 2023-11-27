@@ -71,7 +71,7 @@ const CalculatorUsageGuide = ({ open, onClose }) => {
 
         </p>
         <p>
-          <strong>Formula Used:</strong>
+          
 
         </p>
       </DialogContent>
