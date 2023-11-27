@@ -1,23 +1,25 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useRef} from "react";
 import {Button, Container,InputAdornment,TextField,IconButton, Stack} from '@mui/material';
 //import styled from 'styled-components';
 import styled from "@emotion/styled";
 import { NumericFormat } from 'react-number-format';
 import IMask from 'imask';
+
 import SendIcon from '@mui/icons-material/Send';
 import DeleteIcon from '@mui/icons-material/Delete';
 import LiveHelpIcon from '@mui/icons-material/LiveHelp';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+
+import { useReactToPrint } from "react-to-print";
+
 import CalculatorUsageGuide from "./CalculatorUsageGuide";
+
 //import {PieChart } from '@mui/x-charts/PieChart';
 //import { useDrawingArea } from '@mui/x-charts/hooks';
-import {
-  Chart as ChartJS,
-  ArcElement,
-  Tooltip,
-  Legend
-} from 'chart.js';
-import { Doughnut } from "react-chartjs-2";
+import { Chart as ChartJS, ArcElement,Tooltip, Legend,Title,PointElement,LineElement} from 'chart.js'
+import { Pie, Doughnut } from "react-chartjs-2";
 import { blueGrey, lightGreen } from "@mui/material/colors";
+
 
 ChartJS.register(
   ArcElement,
@@ -70,43 +72,80 @@ const StyledTextField = styled(TextField)`
 
 
 const HomeAffordabilityCalculator = () => {
-  const[monthlyIncome, setMonthlyIncome] = useState(""); //Initially the start value will be 0
-  const[monthlyDebt, setMonthlyDebt] = useState("");
-  const[downpaymentAmt, setDownpaymentAmt] = useState("");
-  //const[totalHomeCost, setTotalHomeCost]  = useState("");
-  const[monthlyHomecost, setMonthlyHomeCost] = useState("");
-  //const[message, setMessage] = useState('')
+  const[monthlyIncome, setMonthlyIncome] = useState(0); //Initially the start value will be 0
+  const[monthlyDebt, setMonthlyDebt] = useState(0);
+  const[downpaymentAmt, setDownpaymentAmt] = useState(0);
+  //const[totalHomeCost, setTotalHomeCost]  = useState(0);
+  const[monthlyHomecost, setMonthlyHomeCost] = useState(0);
 
+  const [ChartData, setChartData] = useState(() => ({
+    labels: [],
+    datasets: [],
+  }));
   const [isGuideOpen, setModalOpen] = useState(false);
+
+
   const openGuide = () => setModalOpen(true);
   const closeGuide = () => setModalOpen(false);
-  const data ={
-    labels:['Debt', 'Home Payment', 'Other'],
-    datasets: [{
-      label:"Monthly Income Breakdown",
-      data: [{monthlyDebt},{downpaymentAmt}],
-      backgroundColor: ['blueGrey','lightGreen'],
-      borderColor:['blueGrey','lightGreen']
-    }]
+
+  useEffect(() => {
+    setChartData({
+      labels: ['Debt', 'Home Payment', 'Other'],
+      datasets: [{
+        label: "Monthly Income Breakdown",
+        data: [monthlyDebt, monthlyIncome * 0.28, monthlyIncome - (monthlyDebt + monthlyIncome * 0.28)],
+        backgroundColor: [blueGrey[500], lightGreen[500], '#ffbb33'],
+        borderColor: [blueGrey[700], lightGreen[700], '#ff8800'],
+        borderWidth: 1,
+      }]
+    });
+  }, [ monthlyDebt,monthlyIncome, downpaymentAmt]); 
+
+//Handler to reset the form
+  const reload= () => {
+    setMonthlyIncome(0);
+    setMonthlyDebt(0);
+    setDownpaymentAmt(0);
+    setMonthlyHomeCost(0);
   }
 
+
+  // const data ={
+  //   labels:['Debt', 'Home Payment', 'Other'],
+  //    datasets: [{
+  //      label:"Monthly Income Breakdown",
+  //      data: [monthlyDebt, monthlyHomecost, remainderSalary],
+  //      //data: [1500,1260,3240],
+  //     //data: [3,6],
+  //      backgroundColor: ['blueGrey','lightGreen','purple'],
+  //      borderColor:['blueGrey','lightGreen','purple']
+  //    }]
+
+
+
+  //    datasets: [{
+  //       label:"Monthly Income Breakdown",
+  //       //data: [monthlyDebt, monthlyHomecost, monthlyIncome],
+  //       backgroundColor: ['darkcyan','lightGreen','purple'],
+  //       borderColor:['darkcyan','lightGreen','purple']
+  //     }]
+
+  
+
  
 
 
 
-  const validateForm =() =>{
-    if(monthlyIncome.length  == 0) {
-      alert('Invalid Form, Monthly Income can not be empty')
-      return
-    }
+  // const validateForm =() =>{
+  //   if(monthlyIncome.length  == 0) {
+  //     alert('Invalid Form, Monthly Income can not be empty')
+  //     return
+  //   }
  
-  }
+  // }
  
  
 
-  const options ={
-
-  }
   // let calculatemonthlyhomecost =() => {
   //   if (monthlyIncome > 0 |monthlyDebt > 0 |downpaymentAmt >= 0){
   //        const monthlyHomeCost = (monthlyIncome - monthlyDebt) * 0.28 
@@ -118,26 +157,62 @@ const HomeAffordabilityCalculator = () => {
   // };
 
 
-  let calcmonthlyhomecost =(event) =>{
-    //cancel default action 
-    event.preventDefault();
+  // let calcmonthlyhomecost =(event) =>{
+  //   //cancel default action 
+  //   event.preventDefault();
   
-    //Validations to prevent invalid input
-    if(monthlyIncome ===0 | monthlyDebt === 0 ){
-      alert('Please enter a valid input')
-    } else{
-       //Calculations to display monthly cost
-      let monthlyHomecost = (monthlyIncome - monthlyDebt) * 0.28   // No more than 28% of net income should go for home costs
-      setMonthlyHomeCost(monthlyHomecost.toFixed(2)) // returns monthly home costs in a decimal format
+  //   //Validations to prevent invalid input
+  //   if(monthlyIncome ===0 | monthlyDebt === 0 ){
+  //     alert('Please enter a valid input')
+  //   } else{
+  //      //Calculations to display monthly cost
+  //     let monthlyHomecost = (monthlyIncome - monthlyDebt) * 0.28   // No more than 28% of net income should go for home costs
+  //     setMonthlyHomeCost(monthlyHomecost.toFixed(2)) // returns monthly home costs in a decimal format         
+
+  //   }
+  //   //Calculations to display total home cost user can afford
+  // }
+
+  const calcmonthlyhomecost = (event) => {
+    event.preventDefault(); // Prevent default form submission behavior
+    if (monthlyIncome > 0 && monthlyDebt >= 0) {
+      const calculatedMonthlyHomeCost = (monthlyIncome - monthlyDebt) * 0.28;
+      setMonthlyHomeCost(calculatedMonthlyHomeCost.toFixed(2));
+    } else {
+      alert('Please enter a valid input for income and debt');
     }
-    //Calculations to display total home cost user can afford
-  
-  }
-  let reload =() => {
-    window.location.reload()
   }
 
+
+
+//   const calcmonthlyhomecostS =() =>{
+//          const remainderSalary = monthlyIncome - monthlyDebt - monthlyHomecost   // "Other income"
+//       setChartData({
+//         labels: ["Debt", "Home Payment", "Other"],
+//         datasets: [
+//           {
+//             data: [monthlyDebt, monthlyHomecost, remainderSalary],
+//             backgroundColor: ['darkcyan','lightGreen','purple'],
+//             borderColor:['darkcyan','lightGreen','purple']
+//           },
+//         ],
+//       })
+// ;
+//   }
+
+
+  // let reload =() => {
+  //   window.location.reload()
+  // }
+
+  const printRef = useRef();
+  const handlePrint = useReactToPrint({
+    content: () => printRef.current,
+    documentTitle: "Home Affordability Calculation Results",
+  });
+
   return (
+  <div ref={printRef}>
     <StyledContainer>
       <h1 style={{ textAlign: "center", marginBottom: "30px" }}>
         Home Affordability Calculator
@@ -155,8 +230,10 @@ const HomeAffordabilityCalculator = () => {
         NumericFormat allowNegative={false} 
         margin="normal"
         onChange={(e) => {
-          e.target.value = e.target.value < 0 ? 0 : e.target.value;
-          setMonthlyIncome(parseFloat(e.target.value));
+          const value = parseFloat(e.target.value)
+          if (!isNaN (value) && value >= 0){
+            setMonthlyIncome(value);
+          }
         }}
       />
     <StyledTextField
@@ -175,8 +252,8 @@ const HomeAffordabilityCalculator = () => {
           e.target.value = e.target.value < 0 ? 0 : e.target.value;
           setMonthlyDebt(parseFloat(e.target.value));
         }}
-      />
-          <StyledTextField
+      /> 
+      <StyledTextField
         variant ="outlined"
         label="Enter Downpayment Amount"
         placeholder="5,000"
@@ -200,6 +277,7 @@ const HomeAffordabilityCalculator = () => {
     <Stack direction="row" spacing={2}> 
       <StyledButton      
         variant="contained" 
+        color="success"
         endIcon={<SendIcon />}
         onClick={calcmonthlyhomecost}
       >
@@ -223,24 +301,77 @@ const HomeAffordabilityCalculator = () => {
         Help
       </StyledButton>
       <CalculatorUsageGuide open={isGuideOpen} onClose={closeGuide} />
+
+      <StyledButton      
+        variant= "contained" 
+        endIcon= {<PictureAsPdfIcon />}
+        onClick={handlePrint}
+        >
+        PDF
+      </StyledButton>
+
       </Stack>
-      <div></div>
       
       <ResultDisplay>You can Afford a Home with a Maximum Monthly Cost of: ${monthlyHomecost}</ResultDisplay>
       <h2> Your Monthly Income Breakdown</h2>
       <div style ={{width:'40%', height: '40%', margin: 'auto', padding: '20px'}}>
         <Doughnut
-          data = {data}
-          options = {options}
-        ></Doughnut>
+          data = {ChartData}
+        />
       </div>
 
-    </StyledContainer>
-  
 
+
+      <div>
+        {/* {ChartData &&(
+          // <Doughnut
+          //   data = {ChartData} 
+          //   // options ={(
+          //   //   responsive = true
+          //   // //   plugins: {}
+          //   // //     legend:(position: "top")
+          //   // //     title:(display:true, text = "Monthly Cost Breakdown")
+          //   // // },
+
+          //   // )}
+          // />
+
+
+          <div>
+            <div
+              style={{ textAlign: "center", marginTop: 30, fontSize: "1.5em" }}
+            >
+              Debt-to-Income Ratio: {ChartData.datasets[0].data[0].toFixed(2)}%
+            </div>
+            <div style={{ width: "300px", height: "300px", margin: "auto" }}>
+              {" "}
+              <Pie data={ChartData} style={{ marginTop: 30 }} />
+            </div>
+          </div>
+
+        )} */}
+        </div>
+
+
+
+
+
+        {/* {ChartData && (
+          <div>
+            <div
+              style={{ textAlign: "center", marginTop: 30, fontSize: "1.5em" }}
+            >
+                Home Affordability Calculation: ChartData.datasets[0].data[0].toFixed(2)
+            </div>
+            <div style={{ width: "300px", height: "300px", margin: "auto" }}>
+              {" "}
+              <Pie data={ChartData} style={{ marginTop: 30 }} />
+            </div>
+          </div>
+        )} */}
+    </StyledContainer>
+  </div>
   );
 };
-
-
 
 export default HomeAffordabilityCalculator;
