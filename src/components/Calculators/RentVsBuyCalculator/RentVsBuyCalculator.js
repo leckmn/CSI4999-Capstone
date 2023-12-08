@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useRef} from "react";
 import {
   Button,
   TextField,
@@ -9,6 +9,10 @@ import styled from "@emotion/styled";
 import { Line } from "react-chartjs-2";
 import ReactDOM from "react-dom";
 import InfoModal from "./InfoModal";
+import { useReactToPrint } from "react-to-print";
+import Header from ".././../Header/Header";
+import ErrorModal from "./ErrorModal";
+
 
 const StyledContainer = styled(Container)`
 margin-top: 160px;
@@ -84,6 +88,8 @@ const RentVsBuyCalculator = () => {
   const [tmpChart, setTmpChart] = useState("");
   const [resultMessage, setResultMessage] = useState("");
   const [isModalOpen, setModalOpen] = useState(false);
+  const [errorModalOpen, setErrorModalOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const [chartData, setChartData] = useState(() => ({
     labels: [],
     datasets: [],
@@ -91,6 +97,16 @@ const RentVsBuyCalculator = () => {
 
   const openModal = () => setModalOpen(true);
   const closeModal = () => setModalOpen(false);
+
+  const openErrorModal = (message) => {
+    setErrorMessage(message);
+    setErrorModalOpen(true);
+  };
+
+  const closeErrorModal = () => {
+    setErrorModalOpen(false);
+    setErrorMessage("");
+  };
 
   useEffect(() => {
     if (tmpChart > 0) {
@@ -103,6 +119,21 @@ const RentVsBuyCalculator = () => {
   };
 
   const generateChartData = ( ) => {
+    if (monthlyRent === undefined || monthlyRent === null || monthlyRent === "" ||
+        annualRentIncrease === undefined || annualRentIncrease === null || annualRentIncrease === "" ||
+        secDep === undefined || secDep === null || secDep === "" ||
+        homePrice === undefined || homePrice === null || homePrice === "" ||
+        downPayment === undefined || downPayment === null || downPayment === "" ||
+        mortgageTerm === undefined || mortgageTerm === null || mortgageTerm === "" ||
+        mortgageInterestRate === undefined || mortgageInterestRate === null || mortgageInterestRate === "" ||
+        maintenanceRepairs === undefined || maintenanceRepairs === null || maintenanceRepairs === "" ||
+        propertyTax === undefined || propertyTax === null || propertyTax === "" ||
+        appreciation === undefined || appreciation === null || appreciation === ""
+        ) {
+          openErrorModal("Please fill all the fields before calculating.");
+          return;
+        }
+    
     // Extract the labels (years)
     const labels = [];
 
@@ -183,192 +214,213 @@ const RentVsBuyCalculator = () => {
       ],
     });
   };
+
+  const printRef = useRef();
+  const handlePrint = useReactToPrint({
+    content: () => printRef.current,
+    documentTitle: "Mortgage Calculation Results",
+  });
  
   return (
-    <StyledContainer>
-      <h1 style={{ textAlign: "center", marginBottom: "30px" }}>
-        Rent vs Buy Calculator
-      </h1>
-      <h1 style={{ textAlign: "", marginBottom: "10px" }}>
-        Rent Information
-      </h1>
-      <StyledTextField
-        variant="outlined"
-        label="Monthly Rent ($)"
-        type="number"
-        placeholder="2500"
-        fullWidth
-        value={monthlyRent}
-        InputProps={{
-          inputProps: { min: 0 },
-        }}
-        onChange={(e) => {
-          e.target.value = e.target.value < 0 ? 0 : e.target.value;
-          setMonthlyRent(parseFloat(e.target.value));
-        }}
-        margin="normal"
-      />
-
-      <StyledTextField
-        variant="outlined"
-        label="Security Deposit ($)"
-        type="number"
-        placeholder="2500"
-        fullWidth
-        value={secDep}
-        onChange={(e) => {
-          e.target.value = e.target.value < 0 ? 0 : e.target.value;
-          setSecDep(parseFloat(e.target.value));
-        }}
-        margin="normal"
-      />
-
-      <StyledTextField
+    <div ref={printRef}>
+      <Header />
+      <StyledContainer>
+        <h1 style={{ textAlign: "center", marginBottom: "30px" }}>
+          Rent vs Buy Calculator
+        </h1>
+        <h1 style={{ textAlign: "", marginBottom: "10px" }}>
+          Rent Information
+        </h1>
+        <StyledTextField
           variant="outlined"
-          label="Annual Rent Increase (%)"
+          label="Monthly Rent ($)"
           type="number"
-          placeholder="2.5"
+          placeholder="2500"
           fullWidth
-          value={annualRentIncrease}
+          value={monthlyRent}
+          InputProps={{
+            inputProps: { min: 0 },
+          }}
           onChange={(e) => {
             e.target.value = e.target.value < 0 ? 0 : e.target.value;
-            setAnnualRentIncrease(parseFloat(e.target.value));
+            setMonthlyRent(parseFloat(e.target.value));
           }}
           margin="normal"
         />
 
-      <h1 style={{ textAlign: "", marginTop: "30px", marginBottom: "10px" }}>
-        Home Information
-      </h1>
-      <StyledTextField
-        variant="outlined"
-        label="Home Price ($)"
-        type="number"
-        placeholder="250000"
-        fullWidth
-        value={homePrice}
-        onChange={(e) => {
-          e.target.value = e.target.value < 0 ? 0 : e.target.value;
-          setHomePrice(parseFloat(e.target.value));
-        }}
-        margin="normal"
-      />
-
-      <StyledTextField
-        variant="outlined"
-        label="Down payment ($)"
-        type="number"
-        placeholder="50000"
-        fullWidth
-        value={downPayment}
-        onChange={(e) => {
-          e.target.value = e.target.value < 0 ? 0 : e.target.value;
-          setDownPayment(parseFloat(e.target.value));
-        }}
-        margin="normal"
-      />
-        
         <StyledTextField
-        variant="outlined"
-        label="Mortgage Term (yr)"
-        type="number"
-        fullWidth
-        value={mortgageTerm}
-        onChange={(e) => {
-          e.target.value = e.target.value < 0 ? 0 : e.target.value;
-          setMortgageTerm(parseFloat(e.target.value));
-        }}
-        margin="normal"
-      />
+          variant="outlined"
+          label="Security Deposit ($)"
+          type="number"
+          placeholder="2500"
+          fullWidth
+          value={secDep}
+          onChange={(e) => {
+            e.target.value = e.target.value < 0 ? 0 : e.target.value;
+            setSecDep(parseFloat(e.target.value));
+          }}
+          margin="normal"
+        />
 
-      <StyledTextField
-        variant="outlined"
-        label="Mortgage Interest Rate (%)"
-        type="number"
-        placeholder="3.75"
-        fullWidth
-        value={mortgageInterestRate}
-        onChange={(e) => {
-          e.target.value = e.target.value < 0 ? 0 : e.target.value;
-          setMortgageInterestRate(parseFloat(e.target.value));
-        }}
-        margin="normal"
-      />
+        <StyledTextField
+            variant="outlined"
+            label="Annual Rent Increase (%)"
+            type="number"
+            placeholder="2.5"
+            fullWidth
+            value={annualRentIncrease}
+            onChange={(e) => {
+              e.target.value = e.target.value < 0 ? 0 : e.target.value;
+              setAnnualRentIncrease(parseFloat(e.target.value));
+            }}
+            margin="normal"
+          />
 
-      <StyledTextField
-        variant="outlined"
-        label="Annual Home Maintenance and Repairs ($)"
-        type="number"
-        placeholder="250"
-        fullWidth
-        value={maintenanceRepairs}
-        onChange={(e) => {
-          e.target.value = e.target.value < 0 ? 0 : e.target.value;
-          setMaintenanceRepairs(parseFloat(e.target.value));
-        }}
-        margin="normal"
-      />
+        <h1 style={{ textAlign: "", marginTop: "30px", marginBottom: "10px" }}>
+          Home Information
+        </h1>
+        <StyledTextField
+          variant="outlined"
+          label="Home Price ($)"
+          type="number"
+          placeholder="250000"
+          fullWidth
+          value={homePrice}
+          onChange={(e) => {
+            e.target.value = e.target.value < 0 ? 0 : e.target.value;
+            setHomePrice(parseFloat(e.target.value));
+          }}
+          margin="normal"
+        />
 
-      <StyledTextField
-        variant="outlined"
-        label="Property Tax ($)"
-        type="number"
-        placeholder="250"
-        fullWidth
-        value={propertyTax}
-        onChange={(e) => {
-          e.target.value = e.target.value < 0 ? 0 : e.target.value;
-          setPropertyTax(parseFloat(e.target.value));
-        }}
-        margin="normal"
-      />
+        <StyledTextField
+          variant="outlined"
+          label="Down payment ($)"
+          type="number"
+          placeholder="50000"
+          fullWidth
+          value={downPayment}
+          onChange={(e) => {
+            e.target.value = e.target.value < 0 ? 0 : e.target.value;
+            setDownPayment(parseFloat(e.target.value));
+          }}
+          margin="normal"
+        />
+          
+          <StyledTextField
+          variant="outlined"
+          label="Mortgage Term (yr)"
+          type="number"
+          fullWidth
+          value={mortgageTerm}
+          onChange={(e) => {
+            e.target.value = e.target.value < 0 ? 0 : e.target.value;
+            setMortgageTerm(parseFloat(e.target.value));
+          }}
+          margin="normal"
+        />
 
-      <StyledTextField
-        variant="outlined"
-        label="Appreciation Rate"
-        type="number"
-        placeholder="3.5"
-        fullWidth
-        value={appreciation}
-        onChange={(e) => {
-          e.target.value = e.target.value < 0 ? 0 : e.target.value;
-          setAppreciation(parseFloat(e.target.value));
-        }}
-        margin="normal"
-      />
+        <StyledTextField
+          variant="outlined"
+          label="Mortgage Interest Rate (%)"
+          type="number"
+          placeholder="3.75"
+          fullWidth
+          value={mortgageInterestRate}
+          onChange={(e) => {
+            e.target.value = e.target.value < 0 ? 0 : e.target.value;
+            setMortgageInterestRate(parseFloat(e.target.value));
+          }}
+          margin="normal"
+        />
 
-      <ButtonContainer>
-        <StyledButton
-          variant="contained"
-          color="primary"
-          onClick={generateChartData}
-          style={{ marginTop: 20 }}
-        >
-          Calculate
-        </StyledButton>
-        <StyledButton
+        <StyledTextField
+          variant="outlined"
+          label="Annual Home Maintenance and Repairs ($)"
+          type="number"
+          placeholder="250"
+          fullWidth
+          value={maintenanceRepairs}
+          onChange={(e) => {
+            e.target.value = e.target.value < 0 ? 0 : e.target.value;
+            setMaintenanceRepairs(parseFloat(e.target.value));
+          }}
+          margin="normal"
+        />
+
+        <StyledTextField
+          variant="outlined"
+          label="Property Tax ($)"
+          type="number"
+          placeholder="250"
+          fullWidth
+          value={propertyTax}
+          onChange={(e) => {
+            e.target.value = e.target.value < 0 ? 0 : e.target.value;
+            setPropertyTax(parseFloat(e.target.value));
+          }}
+          margin="normal"
+        />
+
+        <StyledTextField
+          variant="outlined"
+          label="Appreciation Rate"
+          type="number"
+          placeholder="3.5"
+          fullWidth
+          value={appreciation}
+          onChange={(e) => {
+            e.target.value = e.target.value < 0 ? 0 : e.target.value;
+            setAppreciation(parseFloat(e.target.value));
+          }}
+          margin="normal"
+        />
+
+        <ButtonContainer>
+          <StyledButton
+            variant="contained"
+            color="primary"
+            onClick={generateChartData}
+            style={{ marginTop: 20 }}
+          >
+            Calculate
+          </StyledButton>
+          <StyledButton
               variant="outlined"
               color="primary"
               onClick={openModal}
               style={{ marginLeft: 10 }}
             >
-              Guide
+            Guide
           </StyledButton>
-        </ButtonContainer>
-      <InfoModal open={isModalOpen} onClose={closeModal} />
-      <ResultDisplay>{resultMessage}</ResultDisplay>
-      {chartData.labels && chartData.labels.length > 0 && (
-        <div>
-          <Line data={chartData} style={{ marginTop: 20 }} />
-          <div
-            style={{ textAlign: "center", marginTop: 10, fontSize: "1.5em" }}
+          <StyledButton
+            variant="contained"
+            color="primary"
+            onClick={handlePrint}
+            style={{ marginLeft: "auto" }}
           >
-            
+            PDF
+          </StyledButton>  
+        </ButtonContainer>
+        <InfoModal open={isModalOpen} onClose={closeModal} />
+        <ResultDisplay>{resultMessage}</ResultDisplay>
+        {chartData.labels && chartData.labels.length > 0 && (
+          <div>
+            <Line data={chartData} style={{ marginTop: 20 }} />
+            <div
+              style={{ textAlign: "center", marginTop: 10, fontSize: "1.5em" }}
+            >
+              
+            </div>
           </div>
-        </div>
-      )}
-      
-    </StyledContainer>
+        )}
+        <ErrorModal
+            open={errorModalOpen}
+            onClose={closeErrorModal}
+            errorMessage={errorMessage}
+          />
+      </StyledContainer>
+    </div>
   );
 };
 
