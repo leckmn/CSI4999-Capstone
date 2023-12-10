@@ -119,16 +119,16 @@ const RentVsBuyCalculator = () => {
   };
 
   const generateChartData = ( ) => {
-    if (monthlyRent === undefined || monthlyRent === null || monthlyRent === "" ||
-        annualRentIncrease === undefined || annualRentIncrease === null || annualRentIncrease === "" ||
-        secDep === undefined || secDep === null || secDep === "" ||
-        homePrice === undefined || homePrice === null || homePrice === "" ||
-        downPayment === undefined || downPayment === null || downPayment === "" ||
-        mortgageTerm === undefined || mortgageTerm === null || mortgageTerm === "" ||
-        mortgageInterestRate === undefined || mortgageInterestRate === null || mortgageInterestRate === "" ||
-        maintenanceRepairs === undefined || maintenanceRepairs === null || maintenanceRepairs === "" ||
-        propertyTax === undefined || propertyTax === null || propertyTax === "" ||
-        appreciation === undefined || appreciation === null || appreciation === ""
+    if (monthlyRent === undefined || monthlyRent === null || monthlyRent === "" || isNaN(monthlyRent) ||
+        annualRentIncrease === undefined || annualRentIncrease === null || annualRentIncrease === "" || isNaN(annualRentIncrease) ||
+        secDep === undefined || secDep === null || secDep === "" || isNaN(secDep) ||
+        homePrice === undefined || homePrice === null || homePrice === "" || isNaN(homePrice) ||
+        downPayment === undefined || downPayment === null || downPayment === "" || isNaN(downPayment) ||
+        mortgageTerm === undefined || mortgageTerm === null || mortgageTerm === "" || isNaN(mortgageTerm) ||
+        mortgageInterestRate === undefined || mortgageInterestRate === null || mortgageInterestRate === "" || isNaN(mortgageInterestRate) ||
+        maintenanceRepairs === undefined || maintenanceRepairs === null || maintenanceRepairs === "" || isNaN(maintenanceRepairs) ||
+        propertyTax === undefined || propertyTax === null || propertyTax === "" || isNaN(propertyTax) ||
+        appreciation === undefined || appreciation === null || appreciation === "" || isNaN(appreciation)
         ) {
           openErrorModal("Please fill all the fields before calculating.");
           return;
